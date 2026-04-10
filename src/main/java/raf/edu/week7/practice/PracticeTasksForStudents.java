@@ -27,7 +27,7 @@ public class PracticeTasksForStudents {
     // =========================================================================
 
     static List<String> filterAndUppercase(List<String> reci, int minDuzina) {
-        return Collections.emptyList();
+        return reci.stream().filter(rec -> rec.length() >= minDuzina).map(String::toUpperCase).collect(Collectors.toList());
     }
 
     // =========================================================================
@@ -40,7 +40,7 @@ public class PracticeTasksForStudents {
     // =========================================================================
 
     static String najduziString(List<String> reci) {
-        return "";
+        return reci.stream().reduce((a, b) -> a.length() > b.length() ? a : b).orElse("lol nema");
     }
 
     // =========================================================================
@@ -63,7 +63,11 @@ public class PracticeTasksForStudents {
     static String nadjiStatus(String ime,
                               Map<String, String> korisnici,
                               Map<String, Integer> rangovi) {
-        return "";
+        return Optional.of(ime)
+                .flatMap(name -> Optional.of(korisnici.get(name)))
+                .flatMap(email -> Optional.of(rangovi.get(email)))
+                .map(rang -> rang > 5 ? "VIP: " + ime : "Regular: " + ime).orElse("Regular: " + ime);
+
     }
 
     // =========================================================================
