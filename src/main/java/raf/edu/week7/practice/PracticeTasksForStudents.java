@@ -84,13 +84,13 @@ public class PracticeTasksForStudents {
 
     static Predicate<Integer> spojiSve(List<Predicate<Integer>> predikati) {
         // TODO — koristite reduce za spajanje predikata sa .and()
-        return n -> false;
+        return predikati.stream().reduce(Predicate::and).orElse(null);
     }
 
     static List<Integer> filtrirajSaSvim(List<Integer> brojevi,
                                          List<Predicate<Integer>> predikati) {
         // TODO — koristite spojiSve pa filtrirajte
-        return List.of();
+        return brojevi.stream().filter(spojiSve(predikati)).toList();
     }
 
     // =========================================================================
@@ -109,7 +109,7 @@ public class PracticeTasksForStudents {
 
     static Function<String, String> napraviSlugifier() {
         // TODO — tri UnaryOperator<String> spojene sa andThen
-        return s -> s;
+        return ((Function<String, String>) String::trim).andThen(String::toLowerCase).andThen(string -> string.replace(" ", "-"));
     }
 
     // =========================================================================
@@ -124,7 +124,7 @@ public class PracticeTasksForStudents {
 
     static List<String> unikatneReci(List<String> recenice) {
         // TODO
-        return List.of();
+        return recenice.stream().flatMap(rec -> Arrays.stream(rec.split(" "))).map(String::toLowerCase).distinct().toList();
     }
 
     // =========================================================================
