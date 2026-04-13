@@ -2,6 +2,7 @@ package raf.edu.week7.practice;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.LongAccumulator;
 import java.util.function.*;
 import java.util.stream.*;
 
@@ -64,8 +65,8 @@ public class PracticeTasksForStudents {
                               Map<String, String> korisnici,
                               Map<String, Integer> rangovi) {
         return Optional.of(ime)
-                .flatMap(name -> Optional.of(korisnici.get(name)))
-                .flatMap(email -> Optional.of(rangovi.get(email)))
+                .flatMap(name -> Optional.ofNullable(korisnici.get(name)))
+                .flatMap(email -> Optional.ofNullable(rangovi.get(email)))
                 .map(rang -> rang > 5 ? "VIP: " + ime : "Regular: " + ime).orElse("Regular: " + ime);
 
     }
@@ -83,13 +84,11 @@ public class PracticeTasksForStudents {
     // =========================================================================
 
     static Predicate<Integer> spojiSve(List<Predicate<Integer>> predikati) {
-        // TODO — koristite reduce za spajanje predikata sa .and()
         return predikati.stream().reduce(Predicate::and).orElse(null);
     }
 
     static List<Integer> filtrirajSaSvim(List<Integer> brojevi,
                                          List<Predicate<Integer>> predikati) {
-        // TODO — koristite spojiSve pa filtrirajte
         return brojevi.stream().filter(spojiSve(predikati)).toList();
     }
 
@@ -108,7 +107,6 @@ public class PracticeTasksForStudents {
     // =========================================================================
 
     static Function<String, String> napraviSlugifier() {
-        // TODO — tri UnaryOperator<String> spojene sa andThen
         return ((Function<String, String>) String::trim).andThen(String::toLowerCase).andThen(string -> string.replace(" ", "-"));
     }
 
@@ -123,7 +121,6 @@ public class PracticeTasksForStudents {
     // =========================================================================
 
     static List<String> unikatneReci(List<String> recenice) {
-        // TODO
         return recenice.stream().flatMap(rec -> Arrays.stream(rec.split(" "))).map(String::toLowerCase).distinct().toList();
     }
 
@@ -139,8 +136,7 @@ public class PracticeTasksForStudents {
     // =========================================================================
 
     static Map<Character, Long> brojPoPocetotnomSlovu(List<String> reci) {
-        // TODO
-        return Map.of();
+        return reci.stream().collect(Collectors.groupingBy(rec -> rec.toUpperCase().charAt(0), Collectors.counting()));
     }
 
     // =========================================================================
@@ -157,8 +153,7 @@ public class PracticeTasksForStudents {
     // =========================================================================
 
     static Map<Boolean, Double> prosekParnihNeparnih(List<Integer> brojevi) {
-        // TODO
-        return Map.of();
+        return brojevi.stream().collect(Collectors.partitioningBy(broj -> broj % 2 == 0, Collectors.averagingInt(Integer::intValue)));
     }
 
     // =========================================================================
@@ -190,7 +185,7 @@ public class PracticeTasksForStudents {
 
     static String numerisanaLista(List<String> imena) {
         // TODO
-        return "";
+        return IntStream.range(0, imena.size()).mapToObj(broj -> broj+1 + ". " + imena.get(broj)).collect(Collectors.joining(", "));
     }
 
     // =========================================================================
@@ -233,8 +228,7 @@ public class PracticeTasksForStudents {
     // =========================================================================
 
     static List<Integer> pipelineSaRefovima(List<String> stringovi) {
-        // TODO — koristite String::trim, Integer::parseInt, i collect
-        return List.of();
+        return stringovi.stream().map(String::trim).map(Integer::parseInt).collect(Collectors.toList());
     }
 
     // =========================================================================
@@ -306,11 +300,16 @@ public class PracticeTasksForStudents {
     //   l.get() // NE štampa ništa, vraća "X"
     // =========================================================================
 
-    @SuppressWarnings("unchecked")
     static <T> Supplier<T> lazy(Supplier<T> supplier) {
         // TODO — keširajte rezultat nakon prvog poziva
-        return supplier;
+        Map<T, T> cache = new ConcurrentHashMap<>();
+        return () -> cache.computeIfAbsent(supplier.get(), supplier.get());
     }
+
+//    static <T, R> Function<T, R> memoize(Function<T, R> fn) {
+//        Map<T, R> cache = new ConcurrentHashMap<>();
+//        return argument -> cache.computeIfAbsent(argument, fn);
+//    }
 
     // =========================================================================
     // =========================================================================
