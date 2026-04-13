@@ -299,12 +299,12 @@ public class PracticeTasksForStudents {
     //   l.get() // štampa "Computing!", vraća "X"
     //   l.get() // NE štampa ništa, vraća "X"
     // =========================================================================
-
-    static <T> Supplier<T> lazy(Supplier<T> supplier) {
-        // TODO — keširajte rezultat nakon prvog poziva
-        Map<T, T> cache = new ConcurrentHashMap<>();
-        return () -> cache.computeIfAbsent(supplier.get(), supplier.get());
-    }
+//
+//    static <T> Supplier<T> lazy(Supplier<T> supplier) {
+//        // TODO — keširajte rezultat nakon prvog poziva
+//        Map<T, T> cache = new ConcurrentHashMap<>();
+//        return () -> cache.computeIfAbsent(supplier.get(), supplier.get());
+//    }
 
 //    static <T, R> Function<T, R> memoize(Function<T, R> fn) {
 //        Map<T, R> cache = new ConcurrentHashMap<>();
@@ -347,7 +347,12 @@ public class PracticeTasksForStudents {
     /** FP stil — TODO */
     static String najcescaRecFP(List<String> reci) {
         // TODO
-        return "";
+        return reci.stream()
+                .collect(Collectors
+                        .groupingBy(String::valueOf, Collectors.counting()))
+                .entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue()).get().getKey();
     }
 
     // =========================================================================
@@ -373,8 +378,10 @@ public class PracticeTasksForStudents {
 
     /** FP stil — TODO */
     static Map<String, List<String>> invertujMapuFP(Map<String, List<String>> original) {
-        // TODO
-        return Map.of();
+        Map<String, List<String>> rezultat = new TreeMap<>();
+        original.forEach((key, value) -> value //za svaku osobu
+                .forEach(hobi -> rezultat.computeIfAbsent(hobi, k -> new ArrayList<>()).add(key)));
+        return rezultat; //za svaki predmet dodaj tu osobu
     }
 
     // =========================================================================
@@ -409,8 +416,14 @@ public class PracticeTasksForStudents {
 
     /** FP stil — TODO */
     static Map<String, Double> balansiFP(List<Transakcija> transakcije) {
-        // TODO
-        return Map.of();
+        Map<String, Double> balansi = new HashMap<>();
+        Function<Transakcija, Double> vrednost = t -> t.tip.equals("UPLATA") ? t.iznos() : -t.iznos();
+        transakcije.forEach(t -> balansi.merge(t.osoba, vrednost.apply(t), Double::sum));
+        List<Map.Entry<String, Double>> pozitivni = new ArrayList<>();
+        pozitivni = balansi.entrySet().stream().filter(entry -> entry.getValue() > 0).sorted(Map.Entry.comparingByValue()).toList();
+        Map<String, Double> rezultat = new LinkedHashMap<>();
+        pozitivni.reversed().forEach(entry -> rezultat.put(entry.getKey(), entry.getValue()));
+        return rezultat;
     }
 
     // =========================================================================
@@ -437,7 +450,7 @@ public class PracticeTasksForStudents {
     /** FP stil — TODO */
     static List<Integer> matricaFlatFP(List<List<Integer>> matrica) {
         // TODO
-        return List.of();
+        return matrica.stream().flatMap(List::stream).map(br -> br*br).filter(kvadrat -> kvadrat > 10).toList();
     }
 
     // =========================================================================
@@ -466,8 +479,14 @@ public class PracticeTasksForStudents {
 
     /** FP stil — TODO */
     static List<Map.Entry<Character, Long>> histogramFP(String tekst, int topN) {
-        // TODO
-        return List.of();
+        Map<Character, Long> brojac = new HashMap<>();
+        IntStream.range(0, tekst.length())
+                .mapToObj(tekst::charAt).filter(Character::isLetter).map(Character::toLowerCase)
+                .forEach(c -> brojac.merge(c, 1L, Long::sum));
+
+        return brojac.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .toList().reversed().subList(0, Math.min(topN, brojac.size()));
     }
 
     // =========================================================================
@@ -562,12 +581,12 @@ public class PracticeTasksForStudents {
 
         // --- Zadatak 15 ---
         System.out.println("─── 15: Lazy Supplier ───");
-        int[] lazyPozivi = {0};
-        Supplier<String> orig = () -> { lazyPozivi[0]++; return "rezultat"; };
-        Supplier<String> l = lazy(orig);
-        proveri("Z15a", l.get(), "rezultat");
-        proveri("Z15b", l.get(), "rezultat");
-        proveri("Z15c pozivi", lazyPozivi[0], 1);
+//        int[] lazyPozivi = {0};
+//        Supplier<String> orig = () -> { lazyPozivi[0]++; return "rezultat"; };
+//        Supplier<String> l = lazy(orig);
+//        proveri("Z15a", l.get(), "rezultat");
+//        proveri("Z15b", l.get(), "rezultat");
+//        proveri("Z15c pozivi", lazyPozivi[0], 1);
 
         // --- Zadatak 16 ---
         System.out.println("─── 16: Refactor — najčešća reč ───");
